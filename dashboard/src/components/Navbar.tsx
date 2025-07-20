@@ -1,9 +1,11 @@
-'use client';
+/** @format */
 
-import { useAuth } from '@/contexts/AuthContext';
-import { ThemeToggle } from './ThemeToggle';
-import { Button } from './ui/Button';
-import { LogOut, User } from 'lucide-react';
+"use client";
+
+import { useAuth } from "@/contexts/AuthContext";
+// import { ThemeToggle } from './ThemeToggle';
+import { Button } from "./ui/Button";
+import { LogOut, User } from "lucide-react";
 
 export const Navbar = () => {
   const { user, logout } = useAuth();
@@ -17,10 +19,10 @@ export const Navbar = () => {
               Dashboard
             </h1>
           </div>
-          
+
           <div className="flex items-center space-x-4">
-            <ThemeToggle />
-            
+            {/* <ThemeToggle /> */}
+
             {user && (
               <div className="flex items-center space-x-3">
                 <div className="flex items-center space-x-2">
@@ -32,7 +34,7 @@ export const Navbar = () => {
                     {user.role}
                   </span>
                 </div>
-                
+
                 <Button
                   variant="secondary"
                   size="sm"
