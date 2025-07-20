@@ -1,36 +1,38 @@
-'use client';
+/** @format */
 
-import { useState } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
-import { Button } from './ui/Button';
-import { Input } from './ui/Input';
-import { Card, CardContent, CardHeader } from './ui/Card';
+"use client";
+
+import { useState } from "react";
+import { useAuth } from "@/contexts/AuthContext";
+import { Button } from "../ui/Button";
+import { Input } from "../ui/Input";
+import { Card, CardContent, CardHeader } from "../ui/Card";
 
 export const LoginForm = () => {
   const [formData, setFormData] = useState({
-    email: '',
-    password: '',
+    email: "",
+    password: "",
   });
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
+    setError("");
     setLoading(true);
 
     try {
       await login(formData.email, formData.password);
     } catch (err: any) {
-      setError(err.message || 'Something went wrong');
+      setError(err.message || "Something went wrong");
     } finally {
       setLoading(false);
     }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       [e.target.name]: e.target.value,
     }));
@@ -56,7 +58,7 @@ export const LoginForm = () => {
                 onChange={handleChange}
                 placeholder="Enter your email"
               />
-              
+
               <Input
                 label="Password"
                 name="password"
@@ -73,12 +75,8 @@ export const LoginForm = () => {
                 </div>
               )}
 
-              <Button
-                type="submit"
-                className="w-full"
-                disabled={loading}
-              >
-                {loading ? 'Loading...' : 'Sign In'}
+              <Button type="submit" className="w-full" disabled={loading}>
+                {loading ? "Loading..." : "Sign In"}
               </Button>
             </form>
           </CardContent>

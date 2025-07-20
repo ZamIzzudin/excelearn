@@ -1,22 +1,24 @@
-'use client';
+/** @format */
 
-import { useState, useEffect } from 'react';
-import { api } from '@/lib/api';
-import { Card, CardContent, CardHeader } from './ui/Card';
-import { Button } from './ui/Button';
-import { Input } from './ui/Input';
-import { Plus, Edit, Trash2, Calendar, MapPin, Users } from 'lucide-react';
+"use client";
+
+import { useState, useEffect } from "react";
+import { api } from "@/lib/api";
+import { Card, CardContent, CardHeader } from "../ui/Card";
+import { Button } from "../ui/Button";
+import { Input } from "../ui/Input";
+import { Plus, Edit, Trash2, Calendar, MapPin, Users } from "lucide-react";
 
 interface Event {
-  id: string;
+  _id: string;
   title: string;
   description: string;
   date: string;
   time: string;
   location: string;
-  max_participants: number;
+  maxParticipants: number;
   poster_url?: string;
-  created_at: string;
+  createdAt: string;
 }
 
 export const EventsContent = () => {
@@ -25,12 +27,12 @@ export const EventsContent = () => {
   const [showForm, setShowForm] = useState(false);
   const [editingEvent, setEditingEvent] = useState<Event | null>(null);
   const [formData, setFormData] = useState({
-    title: '',
-    description: '',
-    date: '',
-    time: '',
-    location: '',
-    max_participants: '',
+    title: "",
+    description: "",
+    date: "",
+    time: "",
+    location: "",
+    maxParticipants: "",
   });
   const [posterFile, setPosterFile] = useState<File | null>(null);
 
@@ -43,7 +45,7 @@ export const EventsContent = () => {
       const response = await api.getEvents();
       setEvents(response.events);
     } catch (error) {
-      console.error('Error fetching events:', error);
+      console.error("Error fetching events:", error);
     } finally {
       setLoading(false);
     }
@@ -51,30 +53,30 @@ export const EventsContent = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     const formDataToSend = new FormData();
-    formDataToSend.append('title', formData.title);
-    formDataToSend.append('description', formData.description);
-    formDataToSend.append('date', formData.date);
-    formDataToSend.append('time', formData.time);
-    formDataToSend.append('location', formData.location);
-    formDataToSend.append('max_participants', formData.max_participants);
-    
+    formDataToSend.append("title", formData.title);
+    formDataToSend.append("description", formData.description);
+    formDataToSend.append("date", formData.date);
+    formDataToSend.append("time", formData.time);
+    formDataToSend.append("location", formData.location);
+    formDataToSend.append("max_participants", formData.maxParticipants);
+
     if (posterFile) {
-      formDataToSend.append('poster', posterFile);
+      formDataToSend.append("poster", posterFile);
     }
 
     try {
       if (editingEvent) {
-        await api.updateEvent(editingEvent.id, formDataToSend);
+        await api.updateEvent(editingEvent._id, formDataToSend);
       } else {
         await api.createEvent(formDataToSend);
       }
-      
+
       fetchEvents();
       resetForm();
     } catch (error) {
-      console.error('Error saving event:', error);
+      console.error("Error saving event:", error);
     }
   };
 
@@ -83,41 +85,43 @@ export const EventsContent = () => {
     setFormData({
       title: event.title,
       description: event.description,
-      date: event.date,
+      date: new Date(event.date).toLocaleDateString("en-CA"),
       time: event.time,
       location: event.location,
-      max_participants: event.max_participants.toString(),
+      maxParticipants: event.maxParticipants.toString(),
     });
     setShowForm(true);
   };
 
-  const handleDelete = async (id: string) => {
-    if (confirm('Are you sure you want to delete this event?')) {
+  const handleDelete = async (_id: string) => {
+    if (confirm("Are you sure you want to delete this event?")) {
       try {
-        await api.deleteEvent(id);
+        await api.deleteEvent(_id);
         fetchEvents();
       } catch (error) {
-        console.error('Error deleting event:', error);
+        console.error("Error deleting event:", error);
       }
     }
   };
 
   const resetForm = () => {
     setFormData({
-      title: '',
-      description: '',
-      date: '',
-      time: '',
-      location: '',
-      max_participants: '',
+      title: "",
+      description: "",
+      date: "",
+      time: "",
+      location: "",
+      maxParticipants: "",
     });
     setPosterFile(null);
     setEditingEvent(null);
     setShowForm(false);
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setFormData(prev => ({
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    setFormData((prev) => ({
       ...prev,
       [e.target.name]: e.target.value,
     }));
@@ -130,7 +134,9 @@ export const EventsContent = () => {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Events</h1>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+          Events
+        </h1>
         <Button onClick={() => setShowForm(true)}>
           <Plus className="h-4 w-4 mr-2" />
           Add Event
@@ -141,7 +147,7 @@ export const EventsContent = () => {
         <Card>
           <CardHeader>
             <h3 className="text-lg font-medium text-gray-900 dark:text-white">
-              {editingEvent ? 'Edit Event' : 'Create New Event'}
+              {editingEvent ? "Edit Event" : "Create New Event"}
             </h3>
           </CardHeader>
           <CardContent>
@@ -153,7 +159,7 @@ export const EventsContent = () => {
                 onChange={handleChange}
                 required
               />
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   Description
@@ -197,9 +203,9 @@ export const EventsContent = () => {
 
               <Input
                 label="Max Participants"
-                name="max_participants"
+                name="maxParticipants"
                 type="number"
-                value={formData.max_participants}
+                value={formData.maxParticipants}
                 onChange={handleChange}
                 required
               />
@@ -218,7 +224,7 @@ export const EventsContent = () => {
 
               <div className="flex space-x-2">
                 <Button type="submit">
-                  {editingEvent ? 'Update Event' : 'Create Event'}
+                  {editingEvent ? "Update Event" : "Create Event"}
                 </Button>
                 <Button type="button" variant="secondary" onClick={resetForm}>
                   Cancel
@@ -231,7 +237,7 @@ export const EventsContent = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {events.map((event) => (
-          <Card key={event.id}>
+          <Card key={event._id}>
             {event.poster_url && (
               <div className="aspect-video w-full overflow-hidden rounded-t-lg">
                 <img
@@ -248,7 +254,7 @@ export const EventsContent = () => {
               <p className="text-gray-600 dark:text-gray-400 text-sm mb-3">
                 {event.description}
               </p>
-              
+
               <div className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
                 <div className="flex items-center">
                   <Calendar className="h-4 w-4 mr-2" />
@@ -260,7 +266,7 @@ export const EventsContent = () => {
                 </div>
                 <div className="flex items-center">
                   <Users className="h-4 w-4 mr-2" />
-                  Max {event.max_participants} participants
+                  Max {event.maxParticipants} participants
                 </div>
               </div>
 
@@ -275,7 +281,7 @@ export const EventsContent = () => {
                 <Button
                   size="sm"
                   variant="danger"
-                  onClick={() => handleDelete(event.id)}
+                  onClick={() => handleDelete(event._id)}
                 >
                   <Trash2 className="h-4 w-4" />
                 </Button>

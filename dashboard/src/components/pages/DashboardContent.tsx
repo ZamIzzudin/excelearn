@@ -1,8 +1,10 @@
-'use client';
+/** @format */
 
-import { useAuth } from '@/contexts/AuthContext';
-import { Card, CardContent, CardHeader } from './ui/Card';
-import { Calendar, Users, Activity } from 'lucide-react';
+"use client";
+
+import { useAuth } from "@/contexts/AuthContext";
+import { Card, CardContent, CardHeader } from "../ui/Card";
+import { Calendar, Users, Activity } from "lucide-react";
 
 export const DashboardContent = () => {
   const { user } = useAuth();
@@ -37,7 +39,7 @@ export const DashboardContent = () => {
           </CardContent>
         </Card>
 
-        {user?.role === 'admin' && (
+        {user?.role === "admin" && (
           <Card>
             <CardContent className="flex items-center p-6">
               <div className="flex items-center">

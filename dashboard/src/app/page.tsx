@@ -1,17 +1,19 @@
-'use client';
+/** @format */
 
-import { useState } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
-import { LoginForm } from '@/components/LoginForm';
-import { Navbar } from '@/components/Navbar';
-import { Sidebar } from '@/components/Sidebar';
-import { DashboardContent } from '@/components/DashboardContent';
-import { EventsContent } from '@/components/EventsContent';
-import { UsersContent } from '@/components/UsersContent';
+"use client";
+
+import { useState } from "react";
+import { useAuth } from "@/contexts/AuthContext";
+import { LoginForm } from "@/components/pages/LoginForm";
+import { Navbar } from "@/components/Navbar";
+import { Sidebar } from "@/components/Sidebar";
+import { DashboardContent } from "@/components/pages/DashboardContent";
+import { EventsContent } from "@/components/pages/EventsContent";
+import { UsersContent } from "@/components/pages/UsersContent";
 
 export default function Home() {
   const { user, loading } = useAuth();
-  const [activeTab, setActiveTab] = useState('dashboard');
+  const [activeTab, setActiveTab] = useState("dashboard");
 
   if (loading) {
     return (
@@ -30,12 +32,12 @@ export default function Home() {
 
   const renderContent = () => {
     switch (activeTab) {
-      case 'dashboard':
+      case "dashboard":
         return <DashboardContent />;
-      case 'events':
+      case "events":
         return <EventsContent />;
-      case 'users':
-        return user.role === 'admin' ? <UsersContent /> : <DashboardContent />;
+      case "users":
+        return user.role === "admin" ? <UsersContent /> : <DashboardContent />;
       default:
         return <DashboardContent />;
     }

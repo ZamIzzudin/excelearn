@@ -1,18 +1,20 @@
-'use client';
+/** @format */
 
-import { useState, useEffect } from 'react';
-import { api } from '@/lib/api';
-import { Card, CardContent, CardHeader } from './ui/Card';
-import { Button } from './ui/Button';
-import { Input } from './ui/Input';
-import { Edit, Trash2, User, Shield } from 'lucide-react';
+"use client";
+
+import { useState, useEffect } from "react";
+import { api } from "@/lib/api";
+import { Card, CardContent, CardHeader } from "../ui/Card";
+import { Button } from "../ui/Button";
+import { Input } from "../ui/Input";
+import { Edit, Trash2, User, Shield } from "lucide-react";
 
 interface User {
-  id: string;
+  _id: string;
   email: string;
   name: string;
   role: string;
-  created_at: string;
+  createdAt: string;
 }
 
 export const UsersContent = () => {
@@ -21,10 +23,10 @@ export const UsersContent = () => {
   const [showForm, setShowForm] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [formData, setFormData] = useState({
-    email: '',
-    name: '',
-    role: 'user',
-    password: '',
+    email: "",
+    name: "",
+    role: "user",
+    password: "",
   });
 
   useEffect(() => {
@@ -36,7 +38,7 @@ export const UsersContent = () => {
       const response = await api.getUsers();
       setUsers(response.users);
     } catch (error) {
-      console.error('Error fetching users:', error);
+      console.error("Error fetching users:", error);
     } finally {
       setLoading(false);
     }
@@ -48,7 +50,7 @@ export const UsersContent = () => {
       email: user.email,
       name: user.name,
       role: user.role,
-      password: '',
+      password: "",
     });
     setShowForm(true);
   };
@@ -58,41 +60,48 @@ export const UsersContent = () => {
 
     try {
       if (editingUser) {
-        await api.updateUser(editingUser.id, formData);
+        if (formData.password == "") {
+          const { password, ...rest } = formData;
+          await api.updateUser(editingUser._id, rest);
+        } else {
+          await api.updateUser(editingUser._id, formData);
+        }
       } else {
         await api.createUser(formData);
       }
       fetchUsers();
       resetForm();
     } catch (error) {
-      console.error('Error saving user:', error);
+      console.error("Error saving user:", error);
     }
   };
 
   const handleDelete = async (id: string) => {
-    if (confirm('Are you sure you want to delete this user?')) {
+    if (confirm("Are you sure you want to delete this user?")) {
       try {
         await api.deleteUser(id);
         fetchUsers();
       } catch (error) {
-        console.error('Error deleting user:', error);
+        console.error("Error deleting user:", error);
       }
     }
   };
 
   const resetForm = () => {
     setFormData({
-      email: '',
-      name: '',
-      role: 'user',
-      password: '',
+      email: "",
+      name: "",
+      role: "user",
+      password: "",
     });
     setEditingUser(null);
     setShowForm(false);
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    setFormData(prev => ({
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
+    setFormData((prev) => ({
       ...prev,
       [e.target.name]: e.target.value,
     }));
@@ -105,7 +114,9 @@ export const UsersContent = () => {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Users</h1>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+          Users
+        </h1>
         <Button onClick={() => setShowForm(true)}>
           <User className="h-4 w-4 mr-2" />
           Add User
@@ -116,7 +127,7 @@ export const UsersContent = () => {
         <Card>
           <CardHeader>
             <h3 className="text-lg font-medium text-gray-900 dark:text-white">
-              {editingUser ? 'Edit User' : 'Create New User'}
+              {editingUser ? "Edit User" : "Create New User"}
             </h3>
           </CardHeader>
           <CardContent>
@@ -129,7 +140,7 @@ export const UsersContent = () => {
                 onChange={handleChange}
                 required
               />
-              
+
               <Input
                 label="Name"
                 name="name"
@@ -139,7 +150,11 @@ export const UsersContent = () => {
               />
 
               <Input
-                label={editingUser ? "New Password (leave blank to keep current)" : "Password"}
+                label={
+                  editingUser
+                    ? "New Password (leave blank to keep current)"
+                    : "Password"
+                }
                 name="password"
                 type="password"
                 value={formData.password}
@@ -164,13 +179,9 @@ export const UsersContent = () => {
 
               <div className="flex space-x-2">
                 <Button type="submit">
-                  {editingUser ? 'Update User' : 'Create User'}
+                  {editingUser ? "Update User" : "Create User"}
                 </Button>
-                <Button 
-                  type="button" 
-                  variant="secondary" 
-                  onClick={resetForm}
-                >
+                <Button type="button" variant="secondary" onClick={resetForm}>
                   Cancel
                 </Button>
               </div>
@@ -206,7 +217,7 @@ export const UsersContent = () => {
               </thead>
               <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
                 {users.map((user) => (
-                  <tr key={user.id}>
+                  <tr key={user._id}>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <div className="flex-shrink-0 h-10 w-10">
@@ -225,17 +236,21 @@ export const UsersContent = () => {
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                        user.role === 'admin' 
-                          ? 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200'
-                          : 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
-                      }`}>
-                        {user.role === 'admin' && <Shield className="h-3 w-3 mr-1" />}
+                      <span
+                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                          user.role === "admin"
+                            ? "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200"
+                            : "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
+                        }`}
+                      >
+                        {user.role === "admin" && (
+                          <Shield className="h-3 w-3 mr-1" />
+                        )}
                         {user.role}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                      {new Date(user.created_at).toLocaleDateString()}
+                      {new Date(user.createdAt).toLocaleDateString()}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                       <div className="flex space-x-2">
@@ -249,7 +264,7 @@ export const UsersContent = () => {
                         <Button
                           size="sm"
                           variant="danger"
-                          onClick={() => handleDelete(user.id)}
+                          onClick={() => handleDelete(user._id)}
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>
@@ -267,9 +282,7 @@ export const UsersContent = () => {
         <Card>
           <CardContent className="text-center py-8">
             <User className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-            <p className="text-gray-600 dark:text-gray-400">
-              No users found.
-            </p>
+            <p className="text-gray-600 dark:text-gray-400">No users found.</p>
           </CardContent>
         </Card>
       )}
