@@ -18,11 +18,13 @@ interface User {
 export const UsersContent = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showForm, setShowForm] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [formData, setFormData] = useState({
     email: '',
     name: '',
     role: 'user',
+    password: '',
   });
 
   useEffect(() => {
@@ -46,19 +48,24 @@ export const UsersContent = () => {
       email: user.email,
       name: user.name,
       role: user.role,
+      password: '',
     });
+    setShowForm(true);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!editingUser) return;
 
     try {
-      await api.updateUser(editingUser.id, formData);
+      if (editingUser) {
+        await api.updateUser(editingUser.id, formData);
+      } else {
+        await api.createUser(formData);
+      }
       fetchUsers();
-      setEditingUser(null);
+      resetForm();
     } catch (error) {
-      console.error('Error updating user:', error);
+      console.error('Error saving user:', error);
     }
   };
 
@@ -71,6 +78,17 @@ export const UsersContent = () => {
         console.error('Error deleting user:', error);
       }
     }
+  };
+
+  const resetForm = () => {
+    setFormData({
+      email: '',
+      name: '',
+      role: 'user',
+      password: '',
+    });
+    setEditingUser(null);
+    setShowForm(false);
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -88,13 +106,17 @@ export const UsersContent = () => {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Users</h1>
+        <Button onClick={() => setShowForm(true)}>
+          <User className="h-4 w-4 mr-2" />
+          Add User
+        </Button>
       </div>
 
-      {editingUser && (
+      {showForm && (
         <Card>
           <CardHeader>
             <h3 className="text-lg font-medium text-gray-900 dark:text-white">
-              Edit User
+              {editingUser ? 'Edit User' : 'Create New User'}
             </h3>
           </CardHeader>
           <CardContent>
@@ -116,6 +138,15 @@ export const UsersContent = () => {
                 required
               />
 
+              <Input
+                label={editingUser ? "New Password (leave blank to keep current)" : "Password"}
+                name="password"
+                type="password"
+                value={formData.password}
+                onChange={handleChange}
+                required={!editingUser}
+              />
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   Role
@@ -132,11 +163,13 @@ export const UsersContent = () => {
               </div>
 
               <div className="flex space-x-2">
-                <Button type="submit">Update User</Button>
+                <Button type="submit">
+                  {editingUser ? 'Update User' : 'Create User'}
+                </Button>
                 <Button 
                   type="button" 
                   variant="secondary" 
-                  onClick={() => setEditingUser(null)}
+                  onClick={resetForm}
                 >
                   Cancel
                 </Button>
