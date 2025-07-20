@@ -1,0 +1,6 @@
+Use this command while u wanna push commit
+
+feat:([message]) // if develop new feaature
+fix:([message]) // if fix the error
+enhance:([message]) // if enhance existing feature
+setup:([message]) // if initiate new library, requirement or workspace
