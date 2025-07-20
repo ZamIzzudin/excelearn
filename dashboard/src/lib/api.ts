@@ -1,4 +1,5 @@
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+import toast from 'react-hot-toast';
 
 class ApiClient {
   private baseURL: string;
@@ -30,6 +31,7 @@ class ApiClient {
 
       return data;
     } catch (error) {
+      // Don't show toast here as it's handled in components
       throw error;
     }
   }
@@ -86,24 +88,36 @@ class ApiClient {
 
   async createEvent(formData: FormData) {
     const token = localStorage.getItem('token');
-    return fetch(`${this.baseURL}/api/events`, {
+    const response = await fetch(`${this.baseURL}/api/events`, {
       method: 'POST',
       headers: {
         ...(token && { Authorization: `Bearer ${token}` }),
       },
       body: formData,
-    }).then(res => res.json());
+    });
+    
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.error || 'Failed to create event');
+    }
+    return data;
   }
 
   async updateEvent(id: string, formData: FormData) {
     const token = localStorage.getItem('token');
-    return fetch(`${this.baseURL}/api/events/${id}`, {
+    const response = await fetch(`${this.baseURL}/api/events/${id}`, {
       method: 'PUT',
       headers: {
         ...(token && { Authorization: `Bearer ${token}` }),
       },
       body: formData,
-    }).then(res => res.json());
+    });
+    
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.error || 'Failed to update event');
+    }
+    return data;
   }
 
   async deleteEvent(id: string) {

@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { api } from '@/lib/api';
+import toast from 'react-hot-toast';
 
 interface User {
   id: string;
@@ -57,7 +58,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const response = await api.login(email, password);
       localStorage.setItem('token', response.token);
       setUser(response.user);
+      toast.success(`Welcome back, ${response.user.name}!`);
     } catch (error) {
+      toast.error('Invalid email or password');
       throw error;
     }
   };
@@ -66,6 +69,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const logout = () => {
     localStorage.removeItem('token');
     setUser(null);
+    toast.success('Logged out successfully');
   };
 
   const value = {

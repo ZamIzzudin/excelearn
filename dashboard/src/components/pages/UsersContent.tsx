@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader } from "../ui/Card";
 import { Button } from "../ui/Button";
 import { Input } from "../ui/Input";
 import { Edit, Trash2, User, Shield } from "lucide-react";
+import toast from "react-hot-toast";
 
 interface User {
   _id: string;
@@ -39,6 +40,7 @@ export const UsersContent = () => {
       setUsers(response.users);
     } catch (error) {
       console.error("Error fetching users:", error);
+      toast.error("Failed to load users");
     } finally {
       setLoading(false);
     }
@@ -57,6 +59,7 @@ export const UsersContent = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const loadingToast = toast.loading(editingUser ? 'Updating user...' : 'Creating user...');
 
     try {
       if (editingUser) {
@@ -66,23 +69,29 @@ export const UsersContent = () => {
         } else {
           await api.updateUser(editingUser._id, formData);
         }
+        toast.success('User updated successfully!', { id: loadingToast });
       } else {
         await api.createUser(formData);
+        toast.success('User created successfully!', { id: loadingToast });
       }
       fetchUsers();
       resetForm();
     } catch (error) {
       console.error("Error saving user:", error);
+      toast.error(editingUser ? 'Failed to update user' : 'Failed to create user', { id: loadingToast });
     }
   };
 
   const handleDelete = async (id: string) => {
     if (confirm("Are you sure you want to delete this user?")) {
+      const loadingToast = toast.loading('Deleting user...');
       try {
         await api.deleteUser(id);
         fetchUsers();
+        toast.success('User deleted successfully!', { id: loadingToast });
       } catch (error) {
         console.error("Error deleting user:", error);
+        toast.error('Failed to delete user', { id: loadingToast });
       }
     }
   };

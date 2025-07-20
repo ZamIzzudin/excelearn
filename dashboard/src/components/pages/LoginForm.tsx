@@ -7,6 +7,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "../ui/Button";
 import { Input } from "../ui/Input";
 import { Card, CardContent, CardHeader } from "../ui/Card";
+import toast from "react-hot-toast";
 
 export const LoginForm = () => {
   const [formData, setFormData] = useState({
@@ -21,10 +22,13 @@ export const LoginForm = () => {
     e.preventDefault();
     setError("");
     setLoading(true);
+    const loadingToast = toast.loading('Signing in...');
 
     try {
       await login(formData.email, formData.password);
+      toast.dismiss(loadingToast);
     } catch (err: any) {
+      toast.error('Login failed', { id: loadingToast });
       setError(err.message || "Something went wrong");
     } finally {
       setLoading(false);

@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader } from "../ui/Card";
 import { Button } from "../ui/Button";
 import { Input } from "../ui/Input";
 import { Plus, Edit, Trash2, Calendar, MapPin, Users } from "lucide-react";
+import toast from "react-hot-toast";
 
 interface Event {
   _id: string;
@@ -46,6 +47,7 @@ export const EventsContent = () => {
       setEvents(response.events);
     } catch (error) {
       console.error("Error fetching events:", error);
+      toast.error("Failed to load events");
     } finally {
       setLoading(false);
     }
@@ -53,6 +55,7 @@ export const EventsContent = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const loadingToast = toast.loading(editingEvent ? 'Updating event...' : 'Creating event...');
 
     const formDataToSend = new FormData();
     formDataToSend.append("title", formData.title);
@@ -69,14 +72,17 @@ export const EventsContent = () => {
     try {
       if (editingEvent) {
         await api.updateEvent(editingEvent._id, formDataToSend);
+        toast.success('Event updated successfully!', { id: loadingToast });
       } else {
         await api.createEvent(formDataToSend);
+        toast.success('Event created successfully!', { id: loadingToast });
       }
 
       fetchEvents();
       resetForm();
     } catch (error) {
       console.error("Error saving event:", error);
+      toast.error(editingEvent ? 'Failed to update event' : 'Failed to create event', { id: loadingToast });
     }
   };
 
@@ -95,11 +101,14 @@ export const EventsContent = () => {
 
   const handleDelete = async (_id: string) => {
     if (confirm("Are you sure you want to delete this event?")) {
+      const loadingToast = toast.loading('Deleting event...');
       try {
         await api.deleteEvent(_id);
         fetchEvents();
+        toast.success('Event deleted successfully!', { id: loadingToast });
       } catch (error) {
         console.error("Error deleting event:", error);
+        toast.error('Failed to delete event', { id: loadingToast });
       }
     }
   };
