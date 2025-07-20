@@ -1,6 +1,8 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import { connectDB } from './config/database';
+import { createInitialAdmin } from './controllers/authController';
 import authRoutes from './routes/authRoutes';
 import userRoutes from './routes/userRoutes';
 import eventRoutes from './routes/eventRoutes';
@@ -9,6 +11,12 @@ dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+
+// Connect to MongoDB
+connectDB().then(() => {
+  // Create initial admin user if none exists
+  createInitialAdmin();
+});
 
 // Middleware
 app.use(cors());

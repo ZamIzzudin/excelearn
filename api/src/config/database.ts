@@ -1,15 +1,22 @@
-/** @format */
-
-import { createClient } from "@supabase/supabase-js";
-import dotenv from "dotenv";
+import mongoose from 'mongoose';
+import dotenv from 'dotenv';
 
 dotenv.config();
 
-const supabaseUrl = process.env.SUPABASE_URL!;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+const MONGODB_URI = process.env.MONGODB_URI!;
 
-if (!supabaseUrl || !supabaseServiceKey) {
-  throw new Error("Missing Supabase environment variables");
+if (!MONGODB_URI) {
+  throw new Error('Missing MongoDB URI environment variable');
 }
 
-export const supabase = createClient(supabaseUrl, supabaseServiceKey);
+export const connectDB = async () => {
+  try {
+    await mongoose.connect(MONGODB_URI);
+    console.log('MongoDB connected successfully');
+  } catch (error) {
+    console.error('MongoDB connection error:', error);
+    process.exit(1);
+  }
+};
+
+export default mongoose;

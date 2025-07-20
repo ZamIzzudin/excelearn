@@ -1,19 +1,14 @@
 import { Request, Response } from 'express';
-import { supabase } from '../config/database';
+import { Event } from '../models/Event';
 import { validationResult } from 'express-validator';
 import cloudinary from '../config/cloudinary';
 
 export const getAllEvents = async (req: Request, res: Response) => {
   try {
-    const { data: events, error } = await supabase
-      .from('events')
-      .select('*')
-      .order('created_at', { ascending: false });
-
-    if (error) {
-      return res.status(500).json({ error: 'Failed to fetch events' });
-    }
-
+    const events = await Event.find()
+      .populate('createdBy', 'name email')
+      .sort({ createdAt: -1 });
+    
     res.json({ events });
   } catch (error) {
     console.error('Get events error:', error);
@@ -24,14 +19,9 @@ export const getAllEvents = async (req: Request, res: Response) => {
 export const getEventById = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-
-    const { data: event, error } = await supabase
-      .from('events')
-      .select('*')
-      .eq('id', id)
-      .single();
-
-    if (error || !event) {
+    const event = await Event.findById(id).populate('createdBy', 'name email');
+    
+    if (!event) {
       return res.status(404).json({ error: 'Event not found' });
     }
 
@@ -50,33 +40,26 @@ export const createEvent = async (req: any, res: Response) => {
     }
 
     const { title, description, date, time, location, max_participants } = req.body;
-    let poster_url = null;
+    let posterUrl = null;
 
     // Handle file upload
     if (req.file) {
-      poster_url = req.file.path;
+      posterUrl = req.file.path;
     }
 
-    const { data: event, error } = await supabase
-      .from('events')
-      .insert([
-        {
-          title,
-          description,
-          date,
-          time,
-          location,
-          max_participants: parseInt(max_participants),
-          poster_url,
-          created_by: req.user.userId,
-        }
-      ])
-      .select()
-      .single();
+    const event = new Event({
+      title,
+      description,
+      date: new Date(date),
+      time,
+      location,
+      maxParticipants: parseInt(max_participants),
+      posterUrl,
+      createdBy: req.user.userId,
+    });
 
-    if (error) {
-      return res.status(500).json({ error: 'Failed to create event' });
-    }
+    await event.save();
+    await event.populate('createdBy', 'name email');
 
     res.status(201).json({
       message: 'Event created successfully',
@@ -99,48 +82,38 @@ export const updateEvent = async (req: any, res: Response) => {
     const { title, description, date, time, location, max_participants } = req.body;
 
     // Check if event exists
-    const { data: existingEvent } = await supabase
-      .from('events')
-      .select('*')
-      .eq('id', id)
-      .single();
-
+    const existingEvent = await Event.findById(id);
     if (!existingEvent) {
       return res.status(404).json({ error: 'Event not found' });
     }
 
-    let poster_url = existingEvent.poster_url;
+    let posterUrl = existingEvent.posterUrl;
 
     // Handle new file upload
     if (req.file) {
       // Delete old image from cloudinary if exists
-      if (existingEvent.poster_url) {
-        const publicId = existingEvent.poster_url.split('/').pop()?.split('.')[0];
+      if (existingEvent.posterUrl) {
+        const publicId = existingEvent.posterUrl.split('/').pop()?.split('.')[0];
         if (publicId) {
           await cloudinary.uploader.destroy(`event-posters/${publicId}`);
         }
       }
-      poster_url = req.file.path;
+      posterUrl = req.file.path;
     }
 
-    const { data: event, error } = await supabase
-      .from('events')
-      .update({
+    const event = await Event.findByIdAndUpdate(
+      id,
+      {
         title,
         description,
-        date,
+        date: new Date(date),
         time,
         location,
-        max_participants: parseInt(max_participants),
-        poster_url,
-      })
-      .eq('id', id)
-      .select()
-      .single();
-
-    if (error) {
-      return res.status(500).json({ error: 'Failed to update event' });
-    }
+        maxParticipants: parseInt(max_participants),
+        posterUrl,
+      },
+      { new: true, runValidators: true }
+    ).populate('createdBy', 'name email');
 
     res.json({
       message: 'Event updated successfully',
@@ -157,27 +130,19 @@ export const deleteEvent = async (req: Request, res: Response) => {
     const { id } = req.params;
 
     // Get event to delete poster from cloudinary
-    const { data: event } = await supabase
-      .from('events')
-      .select('poster_url')
-      .eq('id', id)
-      .single();
+    const event = await Event.findById(id);
+    if (!event) {
+      return res.status(404).json({ error: 'Event not found' });
+    }
 
-    if (event?.poster_url) {
-      const publicId = event.poster_url.split('/').pop()?.split('.')[0];
+    if (event.posterUrl) {
+      const publicId = event.posterUrl.split('/').pop()?.split('.')[0];
       if (publicId) {
         await cloudinary.uploader.destroy(`event-posters/${publicId}`);
       }
     }
 
-    const { error } = await supabase
-      .from('events')
-      .delete()
-      .eq('id', id);
-
-    if (error) {
-      return res.status(500).json({ error: 'Failed to delete event' });
-    }
+    await Event.findByIdAndDelete(id);
 
     res.json({ message: 'Event deleted successfully' });
   } catch (error) {

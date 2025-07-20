@@ -42,12 +42,6 @@ class ApiClient {
     });
   }
 
-  async register(email: string, password: string, name: string, role: string = 'user') {
-    return this.request('/api/auth/register', {
-      method: 'POST',
-      body: JSON.stringify({ email, password, name, role }),
-    });
-  }
 
   async getProfile() {
     return this.request('/api/auth/profile');
@@ -62,6 +56,12 @@ class ApiClient {
     return this.request(`/api/users/${id}`);
   }
 
+  async createUser(data: any) {
+    return this.request('/api/users', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
   async updateUser(id: string, data: any) {
     return this.request(`/api/users/${id}`, {
       method: 'PUT',

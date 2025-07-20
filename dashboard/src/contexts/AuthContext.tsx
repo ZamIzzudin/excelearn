@@ -14,7 +14,6 @@ interface AuthContextType {
   user: User | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
-  register: (email: string, password: string, name: string) => Promise<void>;
   logout: () => void;
   isAuthenticated: boolean;
 }
@@ -63,15 +62,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const register = async (email: string, password: string, name: string) => {
-    try {
-      const response = await api.register(email, password, name);
-      localStorage.setItem('token', response.token);
-      setUser(response.user);
-    } catch (error) {
-      throw error;
-    }
-  };
 
   const logout = () => {
     localStorage.removeItem('token');
@@ -82,7 +72,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     user,
     loading,
     login,
-    register,
     logout,
     isAuthenticated: !!user,
   };
