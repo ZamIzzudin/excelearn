@@ -44,7 +44,6 @@ class ApiClient {
     });
   }
 
-
   async getProfile() {
     return this.request('/api/auth/profile');
   }
@@ -64,6 +63,7 @@ class ApiClient {
       body: JSON.stringify(data),
     });
   }
+  
   async updateUser(id: string, data: any) {
     return this.request(`/api/users/${id}`, {
       method: 'PUT',
@@ -84,6 +84,10 @@ class ApiClient {
 
   async getEventById(id: string) {
     return this.request(`/api/events/${id}`);
+  }
+
+  async getEventOptions() {
+    return this.request('/api/events/options');
   }
 
   async createEvent(formData: FormData) {
@@ -123,6 +127,23 @@ class ApiClient {
   async deleteEvent(id: string) {
     return this.request(`/api/events/${id}`, {
       method: 'DELETE',
+    });
+  }
+
+  async registerToEvent(id: string) {
+    return this.request(`/api/events/${id}/register`, {
+      method: 'POST',
+    });
+  }
+
+  async getEventAttendees(id: string) {
+    return this.request(`/api/events/${id}/attendees`);
+  }
+
+  async markAttendance(eventId: string, userId: string, attended: boolean) {
+    return this.request(`/api/events/${eventId}/attendees/${userId}/attendance`, {
+      method: 'PATCH',
+      body: JSON.stringify({ attended }),
     });
   }
 }
